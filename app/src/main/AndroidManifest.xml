@@ -10,7 +10,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <service android:name="com.example.musicplayer.MusicService" />
+        <service android:name="music.te.com.wmusicplayer.MusicService" />
 
         <activity
             android:name=".MainActivity"
