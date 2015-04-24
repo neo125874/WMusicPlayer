@@ -1,5 +1,7 @@
 package music.te.com.wmusicplayer;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -8,9 +10,12 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by tw4585 on 2015/4/23.
@@ -30,6 +35,12 @@ public class MusicService extends Service
 
     private final IBinder musicBind = new MusicBinder();
 
+    private String songTitle="";
+    private static final int NOTIFY_ID=1;
+
+    private boolean shuffle=false;
+    private Random rand;
+
     public void onCreate(){
         //create the service
         //create the service
@@ -40,6 +51,75 @@ public class MusicService extends Service
         player = new MediaPlayer();
 
         initMusicPlayer();
+
+        rand=new Random();
+    }
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
+    }
+
+    public void setShuffle(){
+        if(shuffle)
+            shuffle=false;
+        else
+            shuffle=true;
+    }
+
+    public void playPrev(){
+        songPosn--;
+        if(songPosn<0)
+            songPosn=songs.size()-1;
+        playSong();
+    }
+
+    //skip to next
+    public void playNext(){
+        /*songPosn++;
+        if(songPosn>=songs.size())
+            songPosn=0;
+        playSong();*/
+        if(shuffle){
+            int newSong = songPosn;
+            while(newSong==songPosn){
+                newSong=rand.nextInt(songs.size());
+            }
+            songPosn=newSong;
+        }
+        else{
+            songPosn++;
+            if(songPosn>=songs.size())
+                songPosn=0;
+        }
+        playSong();
+    }
+    /***
+     * You could enhance this functionality by using a queue of songs and preventing any song from being repeated until all songs have been played. *
+     ***/
+
+    public int getPosn(){
+        return player.getCurrentPosition();
+    }
+
+    public int getDur(){
+        return player.getDuration();
+    }
+
+    public boolean isPng(){
+        return player.isPlaying();
+    }
+
+    public void pausePlayer(){
+        player.pause();
+    }
+
+    public void seek(int posn){
+        player.seekTo(posn);
+    }
+
+    public void go(){
+        player.start();
     }
 
     public void setSong(int songIndex){
@@ -51,6 +131,9 @@ public class MusicService extends Service
         player.reset();
         //get song
         Song playSong = songs.get(songPosn);
+
+        songTitle=playSong.getTitle();
+
         //get id
         String currSong = playSong.getID();
         //set uri
@@ -100,17 +183,43 @@ public class MusicService extends Service
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        if(player.getCurrentPosition()>0){
+            mp.reset();
+            playNext();
+        }
     }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        mp.reset();
         return false;
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        // Broadcast intent to activity to let it know the media player has been prepared
+        Intent onPreparedIntent = new Intent("MEDIA_PLAYER_PREPARED");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(onPreparedIntent);
+
         //start playback
         mp.start();
+
+        Intent notIntent = new Intent(this, MainActivity.class);
+        notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent pendInt = PendingIntent.getActivity(this, 0, notIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //Notification.Builder builder = new Notification.Builder(this);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setContentIntent(pendInt)
+                .setSmallIcon(R.drawable.play)
+                .setTicker(songTitle)
+                .setOngoing(true)
+                .setContentTitle("Playing")
+                .setContentText(songTitle);
+
+        Notification not = builder.build();
+
+        startForeground(NOTIFY_ID, not);
     }
 }
