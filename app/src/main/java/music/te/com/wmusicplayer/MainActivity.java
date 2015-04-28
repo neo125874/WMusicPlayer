@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -14,9 +15,12 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ListView;
-import android.widget.MediaController;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -24,7 +28,10 @@ import java.util.Collections;
 import java.util.Comparator;
 
 
-public class MainActivity extends ActionBarActivity implements MediaController.MediaPlayerControl {
+public class MainActivity extends ActionBarActivity implements
+        SurfaceHolder.Callback,
+        VideoControllerView.MediaPlayerControl
+/*MediaController.MediaPlayerControl*/ {
 
     private ArrayList<Song> songList;
     private ListView songView;
@@ -33,14 +40,20 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
     private Intent playIntent;
     private boolean musicBound=false;
 
-    private MusicController controller;
+    //private MusicController controller;
 
     private boolean paused=false, playbackPaused=false;
+
+    //custom layout
+    SurfaceView videoSurface;
+    MediaPlayer player;
+    VideoControllerView controller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        //setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_video_player);
 
         songView = (ListView)findViewById(R.id.song_list);
 
@@ -55,7 +68,13 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
         SongAdapter songAdt = new SongAdapter(this, songList);
         songView.setAdapter(songAdt);
 
-        setController();
+        //setController();
+
+        videoSurface = (SurfaceView) findViewById(R.id.videoSurface);
+        SurfaceHolder videoHolder = videoSurface.getHolder();
+        videoHolder.addCallback(this);
+        //player = new MediaPlayer();
+        //controller = new VideoControllerView(this);
     }
 
     @Override
@@ -102,6 +121,8 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
     private BroadcastReceiver onPrepareReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context c, Intent i) {
+            //very important: set before show
+            setController();
             // When music player has been prepared, show controller
             controller.show(0);
         }
@@ -109,7 +130,13 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
 
     private void setController(){
         //set the controller up
-        controller = new MusicController(this);
+        //controller = new MusicController(this);
+
+        //duplicate controller
+        if(controller != null)
+            controller.hide();
+
+        controller = new VideoControllerView(this);
         controller.setPrevNextListeners(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,8 +150,14 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
         });
 
         controller.setMediaPlayer(this);
-        controller.setAnchorView(findViewById(R.id.song_list));
-        controller.setEnabled(true);
+        //controller.setAnchorView(findViewById(R.id.song_list));
+        controller.setAnchorView((FrameLayout) findViewById(R.id.videoSurfaceContainer));
+        //controller.setEnabled(true);
+    }
+
+    @Override public boolean onTouchEvent(MotionEvent event) {
+        controller.show(0);
+        return false;
     }
 
     //play next
@@ -136,7 +169,7 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
             setController();
             playbackPaused=false;
         }
-        controller.show(0);
+        //controller.show(0);
     }
 
     //play previous
@@ -148,7 +181,7 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
             setController();
             playbackPaused=false;
         }
-        controller.show(0);
+        //controller.show(0);
     }
 
     //connect to the service
@@ -179,7 +212,7 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
             setController();
             playbackPaused=false;
         }
-        controller.show(0);
+        //controller.show(0);
     }
 
     public void getSongList() {
@@ -241,6 +274,7 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
     @Override
     public void start() {
         musicSrv.go();
+        controller.show(0);
     }
 
     @Override
@@ -248,11 +282,13 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
         //musicSrv.pausePlayer();
         playbackPaused=true;
         musicSrv.pausePlayer();
+        controller.show(0);
     }
 
     @Override
     public int getDuration() {
-        if(musicSrv!=null && musicBound && musicSrv.isPng())
+        /*if(musicSrv!=null && musicBound && musicSrv.isPng())*/
+        if(musicSrv!=null && musicBound)
             return musicSrv.getDur();
         else
             return 0;
@@ -260,7 +296,8 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
 
     @Override
     public int getCurrentPosition() {
-        if(musicSrv!=null && musicBound && musicSrv.isPng())
+        /*if(musicSrv!=null && musicBound && musicSrv.isPng())*/
+        if(musicSrv!=null && musicBound)
             return musicSrv.getPosn();
         else
             return 0;
@@ -299,7 +336,30 @@ public class MainActivity extends ActionBarActivity implements MediaController.M
     }
 
     @Override
-    public int getAudioSessionId() {
-        return 0;
+    public boolean isFullScreen() {
+        return false;
     }
+
+    @Override
+    public void toggleFullScreen() {
+
+    }
+
+    // Implement SurfaceHolder.Callback
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        //setController();
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+
+    }
+    // End SurfaceHolder.Callback
+
 }
