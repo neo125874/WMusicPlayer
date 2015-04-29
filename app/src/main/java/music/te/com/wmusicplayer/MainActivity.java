@@ -262,6 +262,10 @@ public class MainActivity extends ActionBarActivity implements
                 musicSrv=null;
                 System.exit(0);
                 break;
+            case R.id.action_repeat:
+                //repeat
+                musicSrv.setRepeat();
+                break;
         }
         //noinspection SimplifiableIfStatement
         /*if (id == R.id.action_settings) {

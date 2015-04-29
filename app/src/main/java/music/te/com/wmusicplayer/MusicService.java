@@ -41,6 +41,8 @@ public class MusicService extends Service
     private boolean shuffle=false;
     private Random rand;
 
+    private boolean repeat = false;
+
     public void onCreate(){
         //create the service
         //create the service
@@ -67,10 +69,25 @@ public class MusicService extends Service
             shuffle=true;
     }
 
+    public void setRepeat()
+    {
+        if (repeat)
+            repeat = false;
+        else
+            repeat = true;
+    }
+
     public void playPrev(){
         songPosn--;
         if(songPosn<0)
             songPosn=songs.size()-1;
+        playSong();
+    }
+
+    //repeat
+    public void playRepeat()
+    {
+        //keep the song position
         playSong();
     }
 
@@ -185,7 +202,16 @@ public class MusicService extends Service
     public void onCompletion(MediaPlayer mp) {
         if(player.getCurrentPosition()>0){
             mp.reset();
-            playNext();
+
+            if(repeat)
+            {
+                playRepeat();
+            }
+            else
+            {
+                playNext();
+            }
+
         }
     }
 
@@ -212,7 +238,7 @@ public class MusicService extends Service
         //Notification.Builder builder = new Notification.Builder(this);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setContentIntent(pendInt)
-                .setSmallIcon(R.drawable.play)
+                .setSmallIcon(R.drawable.quaver2)
                 .setTicker(songTitle)
                 .setOngoing(true)
                 .setContentTitle("Playing")
