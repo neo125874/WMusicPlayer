@@ -352,7 +352,8 @@ public class MainActivity extends ActionBarActivity implements
     // Implement SurfaceHolder.Callback
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        //setController();
+        setController();
+        controller.show(0);
     }
 
     @Override

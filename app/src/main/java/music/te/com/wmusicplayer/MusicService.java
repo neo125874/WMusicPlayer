@@ -48,7 +48,8 @@ public class MusicService extends Service
         //create the service
         super.onCreate();
         //initialize position
-        songPosn=0;
+        /** init with -1: first time to the listview and need not to play **/
+        songPosn=-1;
         //create player
         player = new MediaPlayer();
 
@@ -97,19 +98,25 @@ public class MusicService extends Service
         if(songPosn>=songs.size())
             songPosn=0;
         playSong();*/
-        if(shuffle){
-            int newSong = songPosn;
-            while(newSong==songPosn){
-                newSong=rand.nextInt(songs.size());
+
+        /** if position = -1 means the first time to load the list in **/
+        if(songPosn >= 0)
+        {
+            if(shuffle){
+                int newSong = songPosn;
+                while(newSong==songPosn){
+                    newSong=rand.nextInt(songs.size());
+                }
+                songPosn=newSong;
             }
-            songPosn=newSong;
+            else{
+                songPosn++;
+                if(songPosn>=songs.size())
+                    songPosn=0;
+            }
+            playSong();
         }
-        else{
-            songPosn++;
-            if(songPosn>=songs.size())
-                songPosn=0;
-        }
-        playSong();
+
     }
     /***
      * You could enhance this functionality by using a queue of songs and preventing any song from being repeated until all songs have been played. *
@@ -223,6 +230,7 @@ public class MusicService extends Service
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+
         // Broadcast intent to activity to let it know the media player has been prepared
         Intent onPreparedIntent = new Intent("MEDIA_PLAYER_PREPARED");
         LocalBroadcastManager.getInstance(this).sendBroadcast(onPreparedIntent);
@@ -247,5 +255,6 @@ public class MusicService extends Service
         Notification not = builder.build();
 
         startForeground(NOTIFY_ID, not);
+
     }
 }
