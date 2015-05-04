@@ -266,6 +266,13 @@ public class MainActivity extends ActionBarActivity implements
                 //repeat
                 musicSrv.setRepeat();
                 break;
+            /** volume adjustment **/
+            case R.id.action_high:
+                musicSrv.setVolUp();
+                break;
+            case R.id.action_low:
+                musicSrv.setVolDown();
+                break;
         }
         //noinspection SimplifiableIfStatement
         /*if (id == R.id.action_settings) {

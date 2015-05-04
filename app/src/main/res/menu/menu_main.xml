@@ -5,23 +5,36 @@
         android:orderInCategory="100" app:showAsAction="never" />-->
 
     <item
+        android:id="@+id/action_low"
+        android:icon="@drawable/sound"
+        android:orderInCategory="1"
+        app:showAsAction="always"
+        android:title="Low"/>
+    <item
+        android:id="@+id/action_high"
+        android:icon="@drawable/sound1"
+        android:orderInCategory="2"
+        app:showAsAction="always"
+        android:title="High"/>
+
+    <item
         android:id="@+id/action_repeat"
         android:icon="@drawable/clockwise"
-        android:orderInCategory="1"
+        android:orderInCategory="3"
         app:showAsAction="always"
         android:title="Repeat"/>
 
     <item
         android:id="@+id/action_shuffle"
         android:icon="@drawable/shuffle"
-        android:orderInCategory="2"
+        android:orderInCategory="4"
         app:showAsAction="always"
         android:title="Shuffle"/>
 
     <item
         android:id="@+id/action_end"
         android:icon="@drawable/cancel"
-        android:orderInCategory="3"
+        android:orderInCategory="5"
         app:showAsAction="always"
         android:title="End"/>
 </menu>

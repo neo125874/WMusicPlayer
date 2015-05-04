@@ -3,6 +3,7 @@ package music.te.com.wmusicplayer;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -43,6 +44,13 @@ public class MusicService extends Service
 
     private boolean repeat = false;
 
+    /** volume **/
+    private int maxVolume = 50; // 最大音量值
+    private int curVolume = 20; // 当前音量值
+    private int stepVolume = 0; // 每次调整的音量幅度
+
+    private AudioManager audioMgr = null; // Audio管理器，用了控制音量
+
     public void onCreate(){
         //create the service
         //create the service
@@ -61,6 +69,34 @@ public class MusicService extends Service
     @Override
     public void onDestroy() {
         stopForeground(true);
+    }
+
+    /** volume **/
+    public void setVolUp()
+    {
+        curVolume += stepVolume;
+        if (curVolume >= maxVolume) {
+            curVolume = maxVolume;
+        }
+
+        adjustVolume();
+    }
+
+    public void setVolDown()
+    {
+        curVolume -= stepVolume;
+        if (curVolume <= 0) {
+            curVolume = 0;
+        }
+
+        adjustVolume();
+    }
+
+    /**
+     * 调整音量
+     */
+    private void adjustVolume() {
+        audioMgr.setStreamVolume(AudioManager.STREAM_MUSIC, curVolume, AudioManager.FLAG_SHOW_UI);
     }
 
     public void setShuffle(){
@@ -181,6 +217,15 @@ public class MusicService extends Service
         player.setOnPreparedListener(this);
         player.setOnCompletionListener(this);
         player.setOnErrorListener(this);
+
+        /** volume **/
+        audioMgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        // 获取最大音乐音量
+        maxVolume = audioMgr.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        // 初始化音量大概为最大音量的1/3
+        curVolume = maxVolume / 3;
+        // 每次调整的音量大概为最大音量的1/6
+        stepVolume = maxVolume / 10;
     }
 
     public void setList(ArrayList<Song> theSongs){

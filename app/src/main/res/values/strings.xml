@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WMusicPlayer</string>
+    <string name="app_name">WMP</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
