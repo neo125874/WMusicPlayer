@@ -1,5 +1,5 @@
 # WMusicPlayer
-test music player(cf. http://code.tutsplus.com/tutorials &amp; http://www.brightec.co.uk/blog/custom-android-media-controller)
+test music player(cf. http://code.tutsplus.com/tutorials &amp; http://www.brightec.co.uk/blog/custom-android-media-controller & http://blog.csdn.net/m_changgong/article/details/6846000)
 
 player icon from the tutorial & http://www.iconmay.com/Simple/Coquette_Part_4/music_music_note_music_player_note_blue_music_archive_music_library_music_icon_3258 & http://www.flaticon.com/packs/piofivemusic
 
